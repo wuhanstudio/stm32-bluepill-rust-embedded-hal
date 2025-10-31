@@ -5,6 +5,9 @@
 
 <img width="750" height="500" alt="image" src="https://github.com/user-attachments/assets/90791183-cced-4191-876d-653bbe6f1b05" />
 
+```
+$ rustup target addd thumbv7m-none-eabi
+```
 
 ## References
 
