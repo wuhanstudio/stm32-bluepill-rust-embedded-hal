@@ -7,8 +7,8 @@ use panic_halt as _;
 use embassy_stm32::Config;
 use embassy_stm32::time::Hertz;
 
-use ssd1306::I2CDisplayInterface;
-// use embassy_stm32::{gpio, spi::Spi};
+// use ssd1306::I2CDisplayInterface;
+use embassy_stm32::{gpio, spi::Spi};
 
 // SPI
 // MOSI - PA7
@@ -53,34 +53,34 @@ fn main() -> ! {
     config.rcc.apb1_pre = embassy_stm32::rcc::APBPrescaler::DIV2;
     let p = embassy_stm32::init(config);
 
-    // Set up the I2C interface
-    let i2c = embassy_stm32::i2c::I2c::new_blocking(
-        p.I2C1,
-        p.PB6,
-        p.PB7,
-        Default::default(),
-    );
+    // Choice 1: Set up the I2C interface
+    // let i2c = embassy_stm32::i2c::I2c::new_blocking(
+    //     p.I2C1,
+    //     p.PB6,
+    //     p.PB7,
+    //     Default::default(),
+    // );
 
-    let interface = I2CDisplayInterface::new(i2c);
-    let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate0)
-        .into_buffered_graphics_mode();
-
-    // Set up the SPI interface
-    // let spi = Spi::new_txonly(p.SPI1, p.PA5, p.PA7, p.DMA1_CH3, Default::default());
-    // let cs = gpio::Output::new(p.PA4, gpio::Level::Low, gpio::Speed::Low);
-    // let spi = embedded_hal_bus::spi::ExclusiveDevice::new_no_delay(spi, cs).unwrap();
-
-    // let mut rst = gpio::Output::new(p.PA2, gpio::Level::Low, gpio::Speed::Low);
-    // let dc = gpio::Output::new(p.PA3, gpio::Level::Low, gpio::Speed::Low);
-
-    // // Initialize the display
-    // let interface = SPIInterface::new(spi, dc);
+    // let interface = I2CDisplayInterface::new(i2c);
     // let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate0)
     //     .into_buffered_graphics_mode();
 
-    // display
-    //     .reset(&mut rst, &mut embassy_time::Delay {})
-    //     .unwrap();
+    // Choice 2: Set up the SPI interface
+    let spi = Spi::new_txonly(p.SPI1, p.PA5, p.PA7, p.DMA1_CH3, Default::default());
+    let cs = gpio::Output::new(p.PA4, gpio::Level::Low, gpio::Speed::Low);
+    let spi = embedded_hal_bus::spi::ExclusiveDevice::new_no_delay(spi, cs).unwrap();
+
+    let mut rst = gpio::Output::new(p.PA2, gpio::Level::Low, gpio::Speed::Low);
+    let dc = gpio::Output::new(p.PA3, gpio::Level::Low, gpio::Speed::Low);
+
+    // Initialize the display
+    let interface = SPIInterface::new(spi, dc);
+    let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate0)
+        .into_buffered_graphics_mode();
+
+    display
+        .reset(&mut rst, &mut embassy_time::Delay {})
+        .unwrap();
 
     // Initialize the display
     display.init().unwrap();
