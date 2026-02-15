@@ -3,14 +3,17 @@
 
 use panic_halt as _;
 
-use cortex_m_rt::entry;
-
 // Debugging via RTT, no serrial port needed
 use rtt_target::rtt_init_print;
 use rtt_target::rprintln;
 
-// use cortex_m::peripheral::syst;
+use cortex_m_rt::entry;
 use stm32f1xx_hal::{pac, prelude::*, rcc};
+
+use fugit::ExtU64;
+
+pub mod ticker;
+pub mod timer;
 
 #[entry]
 fn main() -> ! {
@@ -20,22 +23,36 @@ fn main() -> ! {
     
     // Set up the system clock. We want to run at 48MHz for this one.
     let mut flash = dp.FLASH.constrain();
-    let rcc = dp.RCC.freeze(rcc::Config::hse(8.MHz()).sysclk(48.MHz()), &mut flash.acr);
+
+    let rcc = dp.RCC.freeze(
+        rcc::Config::default()
+            .use_hse(8.MHz())       // use external 8 MHz crystal
+            .sysclk(48.MHz()),      // target 48 MHz system clock
+        &mut flash.acr
+    );
 
     let clocks = rcc.clocks;
-    rprintln!("System clock: {} Hz", clocks.sysclk().raw());
-    
+
     // 1 ms tick
     let cp: pac::CorePeripherals = cortex_m::Peripherals::take().unwrap();
     let mut syst  = cp.SYST;
 
-    syst.set_reload(clocks.sysclk().raw() / 1_000 - 1);
+    let ticker = ticker::Ticker::new(&mut syst, &clocks);
+    let mut timer = timer::Timer::new(1000u64.millis(), &ticker);
 
-    syst.clear_current();
-    syst.enable_counter();
-    syst.enable_interrupt();
+    rprintln!("System clock: {} Hz", clocks.sysclk().raw());
+    rprintln!("SysTick reload: {}", syst.rvr.read());
 
+    let mut i = 1;
     loop {
+        // let current = cortex_m::peripheral::SYST::get_current();
+        // rprintln!("SysTick current: {}", current);
 
+        if timer.is_ready() {
+            rprintln!("[{}] Hello, world! Time: {}", i, ticker.now());
+            timer = timer::Timer::new(1000u64.millis(), &ticker);
+
+            i = i + 1;
+        }
     }
 }
