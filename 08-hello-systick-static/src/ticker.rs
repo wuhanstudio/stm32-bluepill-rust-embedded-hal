@@ -1,25 +1,20 @@
 use cortex_m_rt::exception;
+use cortex_m::peripheral::syst::SystClkSource;
 use stm32f1xx_hal::rcc;
 
-use portable_atomic::AtomicU64;
-use core::sync::atomic::Ordering;
+use core::sync::atomic::{AtomicU32, Ordering};
+
 use fugit::{Duration, Instant};
 
 pub type TickInstant = Instant<u64, 1, 1_000>; // 1 kHz clock
 pub type TickDuration = Duration<u64, 1, 1_000>; // 1 kHz clock
 
-static TICKS: AtomicU64 = AtomicU64::new(0);
-
-use cortex_m::peripheral::syst::SystClkSource;
-
-fn ticks() -> u64 {
-    TICKS.load(Ordering::Relaxed)
-}
+static TICKS: AtomicU32 = AtomicU32::new(0);
 
 pub struct Ticker;
 
 impl Ticker {
-    pub fn new(syst: &mut cortex_m::peripheral::SYST, clocks: &rcc::Clocks) -> Self {
+    pub fn init(syst: &mut cortex_m::peripheral::SYST, clocks: &rcc::Clocks) {
         // Set up SysTick to generate an interrupt every 1 ms
         syst.set_reload(clocks.sysclk().raw() / 1_000 - 1);
 
@@ -29,12 +24,10 @@ impl Ticker {
         syst.clear_current();
         syst.enable_counter();
         syst.enable_interrupt();
-
-        Ticker
     }
 
-    pub fn now(&self) -> TickInstant {
-        TickInstant::from_ticks(ticks())
+    pub fn now() -> TickInstant {
+        TickInstant::from_ticks(TICKS.load(Ordering::Relaxed) as u64)
     }
 }
 

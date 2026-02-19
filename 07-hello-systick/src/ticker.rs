@@ -1,18 +1,18 @@
 use cortex_m_rt::exception;
 use stm32f1xx_hal::rcc;
 
-use core::sync::atomic::{AtomicU64, Ordering};
+use core::sync::atomic::{AtomicU32, Ordering};
 use fugit::{Duration, Instant};
 
 pub type TickInstant = Instant<u64, 1, 1_000>; // 1 kHz clock
 pub type TickDuration = Duration<u64, 1, 1_000>; // 1 kHz clock
 
-static TICKS: AtomicU64 = AtomicU64::new(0);
+static TICKS: AtomicU32 = AtomicU32::new(0);
 
 use cortex_m::peripheral::syst::SystClkSource;
 
-fn ticks() -> u64 {
-    TICKS.load(Ordering::Relaxed) as u64
+fn ticks() -> u32 {
+    TICKS.load(Ordering::Relaxed)
 }
 
 pub struct Ticker;

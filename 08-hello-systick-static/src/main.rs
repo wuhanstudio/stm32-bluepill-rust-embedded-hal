@@ -37,8 +37,8 @@ fn main() -> ! {
     let cp: pac::CorePeripherals = cortex_m::Peripherals::take().unwrap();
     let mut syst  = cp.SYST;
 
-    let ticker = ticker::Ticker::new(&mut syst, &clocks);
-    let mut timer = timer::Timer::new(1000u64.millis(), &ticker);
+    ticker::Ticker::init(&mut syst, &clocks);
+    let mut timer = timer::Timer::new(1000u64.millis());
 
     rprintln!("System clock: {} Hz", clocks.sysclk().raw());
     rprintln!("SysTick reload: {}", syst.rvr.read());
@@ -49,8 +49,8 @@ fn main() -> ! {
         // rprintln!("SysTick current: {}", current);
 
         if timer.is_ready() {
-            rprintln!("[{}] Hello, world! Time: {}", i, ticker.now());
-            timer = timer::Timer::new(1000u64.millis(), &ticker);
+            rprintln!("[{}] Hello, world! Time: {}", i, ticker::Ticker::now());
+            timer = timer::Timer::new(1000u64.millis());
 
             i = i + 1;
         }
