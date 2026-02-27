@@ -6,6 +6,10 @@
 <img width="750" height="500" alt="image" src="https://github.com/user-attachments/assets/90791183-cced-4191-876d-653bbe6f1b05" />
 
 ```
+# If you don't have Visual Studio on Windows
+$ rustup toolchain install stable-x86_64-pc-windows-gnu
+$ rustup default stable-x86_64-pc-windows-gnu
+
 $ rustup target addd thumbv7m-none-eabi
 ```
 
