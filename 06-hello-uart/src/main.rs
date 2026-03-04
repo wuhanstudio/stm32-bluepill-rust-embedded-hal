@@ -18,7 +18,10 @@ use core::fmt::Write;
 fn main() -> ! {
     rtt_init_print!();
 
-    let dp = pac::Peripherals::take().unwrap();
+    let Some(dp) = pac::Peripherals::take() else {
+        rprintln!("Failed to take peripheral ownership");
+        loop {}
+    };
 
     let mut flash = dp.FLASH.constrain();
 
