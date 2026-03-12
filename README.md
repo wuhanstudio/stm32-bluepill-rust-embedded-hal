@@ -1,5 +1,8 @@
 # Rust Embedded HAL: From Zero to Aync
 
+> [!NOTE]
+> This tutorial uses STM32 Bluepill, here's another tutorial that uses [BBC Microbitv2](https://github.com/wuhanstudio/bbc-microbit-v2-rust-embedded-hal).
+
 > STM32F103C8T6 (Cortex-M1)  
 > Flash: 64KB, SRAM: 20KB, CPU: 72MHz
 
