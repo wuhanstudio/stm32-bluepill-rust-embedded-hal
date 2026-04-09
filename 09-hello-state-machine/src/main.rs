@@ -29,7 +29,7 @@ fn main() -> ! {
     // Set up the system clock. We want to run at 48MHz for this one.
     let mut flash = dp.FLASH.constrain();
 
-    let rcc = dp.RCC.freeze(
+    let mut rcc = dp.RCC.freeze(
         rcc::Config::default()
             .use_hse(8.MHz())       // use external 8 MHz crystal
             .sysclk(48.MHz()),      // target 48 MHz system clock
@@ -47,7 +47,14 @@ fn main() -> ! {
     rprintln!("System clock: {} Hz", clocks.sysclk().raw());
     rprintln!("SysTick reload: {}", syst.rvr.read());
     
-    let mut blinky_task: InitializedStateMachine<Blinky> = Blinky::default().uninitialized_state_machine().init();
+    // Acquire the GPIOC peripheral
+    let mut gpioc = dp.GPIOC.split(&mut rcc);
+
+    // Configure gpio C pin 13 as a push-pull output. The `crh` register is passed to the function
+    // in order to configure the port. For pins 0-7, crl should be passed instead.
+    let led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
+
+    let mut blinky_task: InitializedStateMachine<Blinky<_>> = Blinky::new(led).uninitialized_state_machine().init();
     rprintln!("Waiting for events at {} ms", Ticker::now().duration_since_epoch().to_millis());
     loop {
         blinky_poll(&mut blinky_task);
