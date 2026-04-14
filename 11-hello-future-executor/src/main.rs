@@ -8,15 +8,12 @@ use rtt_target::rtt_init_print;
 use rtt_target::rprintln;
 
 use cortex_m_rt::entry;
+use embedded_hal::digital::OutputPin;
 use stm32f1xx_hal::{pac, prelude::*, rcc};
 
 pub mod ticker;
 pub mod timer;
-pub mod blinky;
 pub mod executor;
-
-// use crate::blinky::Blinky;
-// use crate::blinky::blinky_poll;
 
 use fugit::ExtU64;
 
@@ -58,6 +55,18 @@ async fn task_2() {
     }
 }
 
+async fn task_led<P: OutputPin>(mut led: P) {
+    loop {
+        // LED On
+        led.set_high().unwrap();
+        timer::delay(100u64.millis()).await;
+
+        // LED Off
+        led.set_low().unwrap();
+        timer::delay(100u64.millis()).await;
+    }
+}
+
 #[entry]
 fn main() -> ! {
     rtt_init_print!();
@@ -67,7 +76,7 @@ fn main() -> ! {
     // Set up the system clock. We want to run at 48MHz for this one.
     let mut flash = dp.FLASH.constrain();
 
-    let rcc = dp.RCC.freeze(
+    let mut rcc = dp.RCC.freeze(
         rcc::Config::default()
             .use_hse(8.MHz())       // use external 8 MHz crystal
             .sysclk(48.MHz()),      // target 48 MHz system clock
@@ -85,7 +94,15 @@ fn main() -> ! {
     rprintln!("System clock: {} Hz", clocks.sysclk().raw());
     rprintln!("SysTick reload: {}", syst.rvr.read());
     
+    // Acquire the GPIOC peripheral
+    let mut gpioc = dp.GPIOC.split(&mut rcc);
+
+    // Configure gpio C pin 13 as a push-pull output. The `crh` register is passed to the function
+    // in order to configure the port. For pins 0-7, crl should be passed instead.
+    let led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
+
     let t1 = core::pin::pin!(task_1());
     let t2 = core::pin::pin!(task_2());
-    executor::run_tasks(&mut [t1, t2]);
+    let t3 = core::pin::pin!(task_led(led));
+    executor::run_tasks(&mut [t1, t2, t3]);
 }
