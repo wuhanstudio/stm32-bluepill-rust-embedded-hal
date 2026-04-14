@@ -6,6 +6,7 @@ use rtt_target::{rprintln, rtt_init_print};
 
 use embassy_time::Timer;
 use embassy_executor::Spawner;
+use embassy_stm32::gpio;
 use embassy_stm32::rcc::*;
 use embassy_stm32::Config;
 
@@ -50,6 +51,19 @@ async fn task_2() {
     }
 }
 
+#[embassy_executor::task]
+async fn task_led(mut led: gpio::Output<'static>) {
+    loop {
+        // LED On
+        led.set_low();
+        Timer::after_millis(1000).await;
+
+        // LED Off
+        led.set_high();
+        Timer::after_millis(1000).await;
+    }
+}
+
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
     rtt_init_print!();
@@ -67,8 +81,10 @@ async fn main(spawner: Spawner) {
         mul: PllMul::MUL9,
     });
 
-    let _p = embassy_stm32::init(config);
+    let p = embassy_stm32::init(config);
+    let led = gpio::Output::new(p.PC13, gpio::Level::High, gpio::Speed::Low);
 
     spawner.spawn(task_1()).unwrap();
     spawner.spawn(task_2()).unwrap();
+    spawner.spawn(task_led(led)).unwrap();
 }
