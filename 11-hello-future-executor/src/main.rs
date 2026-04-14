@@ -59,11 +59,11 @@ async fn task_led<P: OutputPin>(mut led: P) {
     loop {
         // LED On
         led.set_high().unwrap();
-        timer::delay(100u64.millis()).await;
+        timer::delay(1000u64.millis()).await;
 
         // LED Off
         led.set_low().unwrap();
-        timer::delay(100u64.millis()).await;
+        timer::delay(1000u64.millis()).await;
     }
 }
 
