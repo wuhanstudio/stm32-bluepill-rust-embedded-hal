@@ -17,12 +17,15 @@ use core::sync::atomic::{AtomicU32, Ordering};
 
 static TICKS: AtomicU32 = AtomicU32::new(0);
 
-#[derive(Clone, Copy)]
+// #[derive(Clone, Copy)]
 struct CountFuture;
 
 impl Future for CountFuture {
     type Output = ();
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        // Not allowed here due to Pin
+        // let _moved = *self;
+
         let x = TICKS.fetch_add(1, Ordering::SeqCst);
         if (x % 5) == 0 {
             Poll::Ready(())
@@ -35,8 +38,8 @@ impl Future for CountFuture {
 
 #[embassy_executor::task]
 async fn task_1() {
-    let count = CountFuture;
     loop {
+        let count = CountFuture;
         count.await;
         rprintln!("[task_1] Hello Count {}", TICKS.load(Ordering::Relaxed));
         Timer::after_millis(2000).await;

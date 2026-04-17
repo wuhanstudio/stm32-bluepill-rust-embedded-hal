@@ -181,7 +181,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "hello-state-machine"
+name = "hello-future-timer"
 version = "0.1.0"
 dependencies = [
  "cassette",
