@@ -27,7 +27,7 @@ impl Future for CountFuture {
         // let _moved = *self;
 
         let x = TICKS.fetch_add(1, Ordering::SeqCst);
-        if (x % 5) == 0 {
+        if (x % 30000) == 0 {
             Poll::Ready(())
         } else {
             cx.waker().wake_by_ref();
@@ -42,7 +42,6 @@ async fn task_1() {
         let count = CountFuture;
         count.await;
         rprintln!("[task_1] Hello Count {}", TICKS.load(Ordering::Relaxed));
-        Timer::after_millis(2000).await;
     }
 }
 
@@ -50,7 +49,7 @@ async fn task_1() {
 async fn task_2() {
     loop {
         rprintln!("(task_2) Hello World");
-        Timer::after_millis(6000).await;
+        Timer::after_millis(2000).await;
     }
 }
 
