@@ -57,7 +57,7 @@ impl <P: OutputPin> Blinky<P> {
 
     #[action]
     fn exit_led_on(&mut self) {
-        rprintln!("Switching to LED Off");
+        // rprintln!("Switching to LED Off");
     }
 
     #[action]
@@ -69,14 +69,14 @@ impl <P: OutputPin> Blinky<P> {
 
     #[action]
     fn exit_led_off(&mut self) {
-        rprintln!("Switching to LED On");
+        // rprintln!("Switching to LED On");
     }
 }
 
 pub fn blinky_poll<P: OutputPin>(blinky_task: &mut InitializedStateMachine<Blinky<P>>) {
     if blinky_task.timer.is_ready() {
-        let time = Ticker::now();
-        rprintln!("Blinky Event triggered at {} ticks, {} ms", time.ticks(), time.duration_since_epoch().to_millis());
+        // let time = Ticker::now();
+        // rprintln!("Blinky Event triggered at {} ticks, {} ms", time.ticks(), time.duration_since_epoch().to_millis());
         blinky_task.handle(&Event::TimerElapsed);
     }
 }
