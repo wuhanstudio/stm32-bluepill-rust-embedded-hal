@@ -86,7 +86,7 @@ async fn main(spawner: Spawner) {
     let p = embassy_stm32::init(config);
     let led = gpio::Output::new(p.PC13, gpio::Level::High, gpio::Speed::Low);
 
-    spawner.spawn(task_1()).unwrap();
-    spawner.spawn(task_2()).unwrap();
-    spawner.spawn(task_led(led)).unwrap();
+    spawner.spawn(task_1().unwrap());
+    spawner.spawn(task_2().unwrap());
+    spawner.spawn(task_led(led).unwrap());
 }

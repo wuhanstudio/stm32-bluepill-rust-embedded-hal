@@ -9,6 +9,6 @@ cortex-m-rt = "0.7.5"
 embedded-hal = "1.0.0"
 panic-halt = "1.0.0"
 rtt-target = "0.6.2"
-embassy-executor = { version = "0.9.1", features = ["arch-cortex-m", "executor-thread", "executor-interrupt"] }
+embassy-executor = { version = "0.10.0", features = ["platform-cortex-m", "executor-thread", "executor-interrupt"] }
 embassy-time = "0.5.0"
-embassy-stm32 = { version = "0.5.0", features = ["stm32f103c8", "time", "time-driver-any"] }
+embassy-stm32 = { version = "0.6.0", features = ["stm32f103c8", "time", "time-driver-any"] }
